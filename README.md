@@ -68,7 +68,7 @@ There is a 'index.html' document inside this file, the document mainly consists 
 
 ## index.html
 
-### **HTML **
+### **HTML**
 
 1. Set up the overall framework for the phone book.
 2. Created a modal with the ID "modal" for displaying windows after clicking "Edit" and "Add Entry."
