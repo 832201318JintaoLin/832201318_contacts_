@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>电话簿</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+}
+
+.container {
+  width: 90%;
+  max-width: 800px;
+  background-color: white;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  padding: 15px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+#addButton {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+#deleteButton {
+  background-color: #f44336; /* Red */
+  color: white;
+}
+
+#editButton {
+  background-color: #2196F3; /* Blue */
+  color: white;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 30%;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+input[type="text"] {
+  padding: 10px;
+  margin: 10px 0;
+  width: calc(100% - 20px);
+  font-size: 16px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>电话簿</h1>
+  <button id="addButton" onclick="showModal('add')">新增联系人</button>
+  <table id="phonebookTable">
+    <thead>
+      <tr>
+        <th>姓名</th>
+        <th>手机号码</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="phonebookTbody">
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <label for="username">姓名:</label>
+    <input type="text" id="username" name="username">
+    <label for="phone">电话号码:</label>
+    <input type="text" id="phone" name="phone">
+    <input type="hidden" id="entryId" name="entryId">
+    <button id="submit" >保存</button>
+  </div>
+</div>
+
+<script>
+function showModal(mode, id) {
+  const modal = document.getElementById('modal');
+  modal.style.display = "block";
+  document.getElementById('submit').onclick = mode === 'add' ? addEntry : updateEntry;
+  
+  if (mode === 'edit') {
+    document.getElementById('entryId').value = id;
+    document.getElementById('username').value = '';
+    document.getElementById('phone').value = '';
+  }
+}
+
+/*
+onclick函数用来监控事件，这个js里面监控的是submit，
+用于检测鼠标是否点击modal（新建联系人跳出的框）以外
+的区域，如果点击了，关闭modal。
+*/
+window.onclick = function(event) {
+  const modal = document.getElementById('modal');
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+
+/*
+这个函数用于处理用户点击关闭按钮时的页面响应，当用户点击
+关闭按钮，自动调用。该函数会关闭模态框并清除输入。
+*/
+document.querySelector('.close').onclick = function() {
+  const modal = document.getElementById('modal');
+  modal.style.display = "none";
+  clearInputs();
+};
+
+function clearInputs() {
+  document.getElementById('username').value = '';
+  document.getElementById('phone').value = '';
+}
+
+
+function addEntry() {
+  const username = document.getElementById('username').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  if (!username || !phone) {
+    alert("姓名和电话号码不能为空");
+    return;
+  }
+  fetch('http://localhost:8888/add', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, phone })
+  })
+  .then(loadPhoneBook)
+  .catch(console.error);
+  modal.style.display = "none";
+  clearInputs();
+}
+
+function loadPhoneBook() {
+  fetch('http://localhost:8888/list')
+    .then(response => response.json())
+    .then(data => displayData(data))
+    .catch(console.error);
+}
+
+
+/*
+displayData用于显示表格内容，先清理ID为'phoneTbody'的表格内容
+接着遍历data内容，为每一行data创造一个row，把所有元素添加进去，
+接着把row添加进去'phoneTbody'的表格里面
+*/
+function displayData(data) {
+  const tbody = document.getElementById('phonebookTbody');
+  tbody.innerHTML = ''; // Clear previous data
+  data.forEach(entry => {
+    const row = document.createElement('tr');
+    const usernameCell = document.createElement('td');
+    const phoneCell = document.createElement('td');
+    const actionCell = document.createElement('td');
+
+    usernameCell.textContent = entry.username;
+    phoneCell.textContent = entry.phone;
+
+    const deleteButton = document.createElement('button');
+    deleteButton.id = 'deleteButton';
+    deleteButton.textContent = '删除';
+    deleteButton.onclick = () => deleteEntry(entry.id);
+
+    const editButton = document.createElement('button');
+    editButton.id = 'editButton';
+    editButton.textContent = '编辑';
+    editButton.onclick = () => {
+      showModal('edit', entry.id);
+      document.getElementById('username').value = entry.username;
+      document.getElementById('phone').value = entry.phone;
+    };
+
+    actionCell.appendChild(deleteButton);
+    actionCell.appendChild(editButton);
+
+    row.appendChild(usernameCell);
+    row.appendChild(phoneCell);
+    row.appendChild(actionCell);
+
+    tbody.appendChild(row);
+  });
+}
+
+function deleteEntry(id) {
+  if(confirm("确定要删除此条目吗?")) {
+    fetch(`http://localhost:8888/delete?id=${id}`, { method: 'DELETE' })
+      .then(loadPhoneBook)
+      .catch(console.error);
+  }
+}
+
+function updateEntry() {
+  const username = document.getElementById('username').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const entryId = document.getElementById('entryId').value;
+  if (!username || !phone) {
+    alert("姓名和电话号码不能为空");
+    return;
+  }
+  fetch('http://localhost:8888/update', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ id: entryId, username, phone })
+  })
+  .then(loadPhoneBook)
+  .catch(console.error);
+  modal.style.display = "none";
+  clearInputs();
+}
+
+// Initially load the phone book entries
+loadPhoneBook();
+</script>
+
+</body>
+</html>
