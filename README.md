@@ -4,35 +4,35 @@ This file aims to explain the purpose of each file.
 
 # Back End
 
-## src
+ ## src
 
-### **Resource**
+  ### **Resource**
 
-#### **application.yml**
+   #### **application.yml**
 
- Used to connect the back-end Java files to the MySQL database (defines the port and inputs the database username and password).
+     Used to connect the back-end Java files to the MySQL database (defines the port and inputs the database username and password).
 
-### **entity**
+  ### **entity**
 
-#### User.java
+   #### User.java
 
- Create a User entity that matches all the properties in the database. The User entity serves as an instantiation of the table in the MySQL database.
+     Create a User entity that matches all the properties in the database. The User entity serves as an instantiation of the table in the MySQL database.
 
-### **Mapper**
+  ### **Mapper**
 
-#####  **UserMapper.java**
+   #####  **UserMapper.java**
 
- The UserMapper interface defines a Mapper layer related to the User entity, specifying the operations to perform on the database. This project imports MyBatis-Plus's BaseMapper, allowing the UserMapper interface to inherit from it. Through the UserMapper interface, you can directly call methods provided by MyBatis-Plus without manually writing SQL statements.
+     The UserMapper interface defines a Mapper layer related to the User entity, specifying the operations to perform on the database. This project imports MyBatis-Plus's     BaseMapper, allowing the UserMapper interface to inherit from it. Through the UserMapper interface, you can directly call methods provided by MyBatis-Plus without           manually writing SQL statements.
 
-##### **UserMapper.xml**
+   ##### **UserMapper.xml**
 
- This is an XML mapping file for MyBatis, typically used to configure SQL statements and mapping relationships. Specifically, it maps the operations defined in UserMapper to SQL statements. However, in this project, the UserMapper interface uses methods from BaseMapper for User operations, so there are no specific SQL statements.
+     This is an XML mapping file for MyBatis, typically used to configure SQL statements and mapping relationships. Specifically, it maps the operations defined in            UserMapper to SQL statements. However, in this project, the UserMapper interface uses methods from BaseMapper for User operations, so there are no specific SQL statements.
 
-### **Service**
+  ### **Service**
 
-####  **UserService**
+   ####  **UserService**
 
- The UserService interface defines business logic methods related to the User entity. In this project, UserService extends the IService interface, allowing it to directly use the basic CRUD operations provided by MyBatis-Plus.
+    The UserService interface defines business logic methods related to the User entity. In this project, UserService extends the IService interface, allowing it to    directly use the basic CRUD operations provided by MyBatis-Plus.
 
 #### **impl**
 
